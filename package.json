@@ -1,0 +1,22 @@
+{
+  "name": "booksscraper",
+  "version": "1.0.0",
+  "description": "Exercise for those who want to learn to scrap in Javascript and how to setup an API with Node JS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jota12x/BooksScraper.git"
+  },
+  "author": "Juanjose Tenorio",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jota12x/BooksScraper/issues"
+  },
+  "homepage": "https://github.com/jota12x/BooksScraper#readme",
+  "dependencies": {
+    "puppeteer": "^1.18.1"
+  }
+}
