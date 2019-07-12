@@ -9,19 +9,23 @@ let scrapeProcess = async()=>{
 
   await page.goto('http://books.toscrape.com/')
 
-  /* page.on('console', msg => {
+  page.on('console', msg => {
     console.log(msg.args());
-  });*/
+  });
 
-  const numPages = await page.evaluate(
+  const {numPages,booksPerPage} = await page.evaluate(
     ()=>{
       re=/of\s(.*)/;
       current = document.querySelector(".current").innerText;
       numPages=parseInt(re.exec(current)[1],10);
-      return numPages;
+      formText=document.querySelector(".form-horizontal").innerText;
+      reText=/(\d*)\./;
+      booksPerPage=parseInt(reText.exec(formText)[1],10);
+      return {numPages,booksPerPage};
     }
   )
   console.log(chalk.white(`Number of pages is: ${numPages}`));
+  console.log(chalk.white(`Books per page is: ${booksPerPage}`));
   results=[];
   for(let i =0;i<numPages;i++){
     let result=[];
@@ -53,14 +57,34 @@ let scrapeProcess = async()=>{
       }
       return data;
     });
+    for(j=0;j<booksPerPage;j++){
+      await page.click(`#default > div.container-fluid.page > div > div > div > section > div:nth-child(2) > ol > li:nth-child(${j+1}) > article > div.image_container > a > img`);
+      await page.waitFor(1000);
+      bookInfo=await page.evaluate(
+        ()=>{
+          re=/\((\d*)/;
+          stock=parseInt(re.exec(document.querySelector("#content_inner > article > div.row > div.col-sm-6.product_main > p.instock.availability").innerText)[1],10);
+          description=document.querySelector("#content_inner > article > p").innerText;
+          attributes=[];
+          attributeList=(document.querySelector(".table-striped")).querySelectorAll("tr");
+          attributeList.forEach(attribute=>{
+            attributes.push({attribute:attribute.querySelector("th").innerText,
+              value:attribute.querySelector("td").innerText})
+          })
+          return {stock,description,attributes};
+        }
+      )
+      result[i*booksPerPage + j].stock=bookInfo.stock;
+      result[i*booksPerPage + j].description=bookInfo.description;
+      result[i*booksPerPage + j].attributes=bookInfo.attributes;
+      await page.goBack();
+      // await page.waitFor(1000);
+    }
     results.push(result);
     if(i<numPages-1)
       await page.click('#default > div.container-fluid.page > div > div > div > section > div:nth-child(2) > div > ul > li.next > a');
   }
   console.log(chalk.green("Scraping completed"));
-  // console.log(result);
-  // await page.click('#default > div > div > div > div > section > div:nth-child(2) > ol > li:nth-child(1) > article > div.image_container > a > img');
-
   browser.close();
   return results;
 }
