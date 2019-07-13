@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const chalk = require('chalk');
 
+console.time("books scraping");
 let scrapeProcess = async()=>{
   console.log(chalk.white("Scraping begins.."));
   const browser = await puppeteer.launch({headless:false});
@@ -63,8 +64,9 @@ let scrapeProcess = async()=>{
       bookInfo=await page.evaluate(
         ()=>{
           re=/\((\d*)/;
-          stock=parseInt(re.exec(document.querySelector("#content_inner > article > div.row > div.col-sm-6.product_main > p.instock.availability").innerText)[1],10);
-          description=document.querySelector("#content_inner > article > p").innerText;
+          stockElem=document.querySelector("#content_inner > article > div.row > div.col-sm-6.product_main > p.instock.availability");
+          stock=stockElem?parseInt(re.exec(stockElem.innerText)[1],10):null;
+          description=document.querySelector("#content_inner > article > p")?document.querySelector("#content_inner > article > p").innerText:null;
           attributes=[];
           attributeList=(document.querySelector(".table-striped")).querySelectorAll("tr");
           attributeList.forEach(attribute=>{
@@ -74,13 +76,14 @@ let scrapeProcess = async()=>{
           return {stock,description,attributes};
         }
       )
-      result[i*booksPerPage + j].stock=bookInfo.stock;
-      result[i*booksPerPage + j].description=bookInfo.description;
-      result[i*booksPerPage + j].attributes=bookInfo.attributes;
+      result[j].stock=bookInfo.stock;
+      result[j].description=bookInfo.description;
+      result[j].attributes=bookInfo.attributes;
       await page.goBack();
       // await page.waitFor(1000);
     }
     results.push(result);
+    console.log(chalk.yellow(`Page ${i+1} completed`))
     if(i<numPages-1)
       await page.click('#default > div.container-fluid.page > div > div > div > section > div:nth-child(2) > div > ul > li.next > a');
   }
@@ -89,11 +92,13 @@ let scrapeProcess = async()=>{
   return results;
 }
 scrapeProcess().then(data=>{
-  fs.writeFile('products.json',JSON.stringify(data),(err)=>{
+  fs.writeFile('books.json',JSON.stringify(data),(err)=>{
+    console.timeEnd("books scraping");
     if(err) {
       console.log(chalk.red('Error on writing file'));
       throw err;
     }
     console.log(chalk.green('File written successfully'))
+
   });
 });
