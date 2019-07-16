@@ -1,1 +1,1 @@
-// require
+seed = require('./api/seed')

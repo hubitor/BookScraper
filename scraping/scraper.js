@@ -35,6 +35,13 @@ let scrapeProcess = async()=>{
       let elements=document.querySelectorAll(".product_pod");
       for(let element of elements){
         let rating = element.childNodes[3].className.split(" ")[1];
+        let imageContainer=element.childNodes[1];
+        if(imageContainer.childNodes[1]){
+          if(imageContainer.childNodes[1].childNodes[0])
+            image= imageContainer.childNodes[1].childNodes[0].src;
+          else image='';
+        }
+        else image='';
         switch(rating){
           case 'One':
             rating=1;
@@ -54,7 +61,7 @@ let scrapeProcess = async()=>{
         }
         let title = element.childNodes[5].childNodes[0].attributes[1].value;
         let price = element.childNodes[7].children[0].innerText; // Select the price
-        data.push({title, price,rating}); // Push an object with the data onto our array
+        data.push({title, price,rating,image}); // Push an object with the data onto our array
       }
       return data;
     });
@@ -92,7 +99,7 @@ let scrapeProcess = async()=>{
   return results;
 }
 scrapeProcess().then(data=>{
-  fs.writeFile('books.json',JSON.stringify(data),(err)=>{
+  fs.writeFile('books_test.json',JSON.stringify(data),(err)=>{
     console.timeEnd("books scraping");
     if(err) {
       console.log(chalk.red('Error on writing file'));
