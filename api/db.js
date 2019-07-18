@@ -4,4 +4,4 @@ mongoose.connect('mongodb://localhost:27017/BooksToScrape', {useNewUrlParser: tr
 mongoose.connection
         .once('open',()=>console.log('Connection done'))
         .on('error',()=>console.warn('Could not connect to the database'));
-module.exports=mongoose
+module.exports=mongoose;
