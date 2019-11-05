@@ -20,7 +20,7 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "mocha": "^6.1.4",
-    "mongoose": "^5.6.4",
+    "mongoose": "^5.7.5",
     "puppeteer": "^1.18.1"
   }
 }
